@@ -71,7 +71,7 @@ LightmapSettings:
     m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
     m_MixedBakeMode: 1
-    m_BakeBackend: 2
+    m_BakeBackend: 0
     m_PVRSampling: 1
     m_PVRDirectSampleCount: 32
     m_PVRSampleCount: 500
@@ -88,7 +88,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
-  m_LightingDataAsset: {fileID: 112000000, guid: f30d5442644cd8f4dabab0d96dad0e2d,
+  m_LightingDataAsset: {fileID: 112000000, guid: 03f88e2a268c0f745a2421dab5db0f8a,
     type: 2}
   m_UseShadowmask: 0
 --- !u!196 &5
