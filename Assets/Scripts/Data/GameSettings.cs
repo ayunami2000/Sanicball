@@ -7,7 +7,7 @@ namespace Sanicball.Data
     {
         [Header("Online")]
         public string nickname = "";
-		public string serverListURL = "https://sanicball.bdgr.zone/servers/";
+		public string serverListURL = "http://ayunami2000.pythonanywhere.com/servers/";
 
         public string gameJoltUsername;
         public string gameJoltToken;
@@ -37,7 +37,7 @@ namespace Sanicball.Data
         public float oldControlsKbSpeed = 10f;
 
         [Header("Audio")]
-        public float soundVolume = 1f;
+        public float soundVolume = 0.3f;
 
         public bool music = true;
         public bool fastMusic = true;

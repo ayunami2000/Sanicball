@@ -13,7 +13,7 @@ public class ScreenshotTool : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log("Screenshot captured.");
-            Application.CaptureScreenshot("screenshot.png", 2);
+            ScreenCapture.CaptureScreenshot("screenshot.png", 2);
         }
     }
 }

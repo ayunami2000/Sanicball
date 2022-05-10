@@ -1,4 +1,4 @@
-﻿using Lidgren.Network;
+﻿//using Lidgren.Network;
 using SanicballCore;
 using UnityEngine;
 
@@ -18,10 +18,11 @@ namespace Sanicball.Logic
         private UI.PopupConnecting activeConnectingPopup;
 
         //NetClient for when joining online matches
-        private NetClient joiningClient;
+        //private NetClient joiningClient;
 
         private void Update()
         {
+            /*
             if (joiningClient != null)
             {
                 NetIncomingMessage msg;
@@ -91,7 +92,7 @@ namespace Sanicball.Logic
                                     joiningClient.Disconnect("Failed to read match state");
                                     Debug.LogError("Could not read match state, error: " + ex.Message);
                                     Debug.LogError("Full message: " + matchStateStr);
-                                }*/
+                                }*//*
                             }
                             break;
                     }
@@ -103,6 +104,7 @@ namespace Sanicball.Logic
                     joiningClient = null;
                 }
             }
+            */
         }
 
         public void BeginLocalGame()
@@ -111,11 +113,14 @@ namespace Sanicball.Logic
             manager.InitLocalMatch();
         }
 
+        /*
         public void JoinOnlineGame(string ip = "127.0.0.1", int port = 25000)
         {
             JoinOnlineGame(new System.Net.IPEndPoint(System.Net.IPAddress.Parse(ip), port));
         }
+        */
 
+        /*
         public void JoinOnlineGame(System.Net.IPEndPoint endpoint)
         {
             NetPeerConfiguration conf = new NetPeerConfiguration(APP_ID);
@@ -134,12 +139,15 @@ namespace Sanicball.Logic
 
             activeConnectingPopup = FindObjectOfType<UI.PopupConnecting>();
         }
+        */
 
+        /*
         //Called when succesfully connected to a server
         private void BeginOnlineGame(MatchState matchState)
         {
             MatchManager manager = Instantiate(matchManagerPrefab);
             manager.InitOnlineMatch(joiningClient, matchState);
         }
+        */
     }
 }

@@ -37,7 +37,7 @@ namespace Sanicball.UI
             MatchStarter starter = FindObjectOfType<MatchStarter>();
             if (starter)
             {
-                starter.JoinOnlineGame(endpoint);
+                //starter.JoinOnlineGame(endpoint);
             }
             else
             {

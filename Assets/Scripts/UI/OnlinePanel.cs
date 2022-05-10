@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using Lidgren.Network;
+//using Lidgren.Network;
 using Sanicball.Data;
 using Sanicball.Logic;
 using UnityEngine;
@@ -23,7 +23,7 @@ namespace Sanicball.UI
         //Stores server browser IPs, so they can be differentiated from LAN servers
         private List<string> serverBrowserIPs = new List<string>();
 
-        private NetClient discoveryClient;
+        //private NetClient discoveryClient;
         private WWW serverBrowserRequester;
         private DateTime latestLocalRefreshTime;
         private DateTime latestBrowserRefreshTime;
@@ -32,7 +32,7 @@ namespace Sanicball.UI
         {
             serverBrowserIPs.Clear();
 
-            discoveryClient.DiscoverLocalPeers(25000);
+            //discoveryClient.DiscoverLocalPeers(25000);
             latestLocalRefreshTime = DateTime.Now;
 
 			serverBrowserRequester = new WWW(ActiveData.GameSettings.serverListURL);
@@ -52,10 +52,10 @@ namespace Sanicball.UI
         {
             errorField.enabled = false;
 
-            NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
-            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-            discoveryClient = new NetClient(config);
-            discoveryClient.Start();
+            //NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
+            //config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            //discoveryClient = new NetClient(config);
+            //discoveryClient.Start();
         }
 
         private void Update()
@@ -85,8 +85,8 @@ namespace Sanicball.UI
                         int portInt;
                         if (int.TryParse(port, out portInt))
                         {
-                            System.Threading.Thread discoverThread = new System.Threading.Thread(() => { discoveryClient.DiscoverKnownPeer(ip, portInt); });
-                            discoverThread.Start();
+                            //System.Threading.Thread discoverThread = new System.Threading.Thread(() => { discoveryClient.DiscoverKnownPeer(ip, portInt); });
+                            //discoverThread.Start();
                             serverBrowserIPs.Add(ip);
                         }
                     }
@@ -102,6 +102,7 @@ namespace Sanicball.UI
             }
 
             //Check for messages on the discovery client
+            /*
             NetIncomingMessage msg;
             while ((msg = discoveryClient.ReadMessage()) != null)
             {
@@ -140,6 +141,7 @@ namespace Sanicball.UI
                         break;
                 }
             }
+            */
         }
 
         private void RefreshNavigation()

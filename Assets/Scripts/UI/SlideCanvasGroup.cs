@@ -20,8 +20,10 @@ namespace Sanicball.UI
         {
             isOpen = true;
             gameObject.SetActive(true);
-            cg.alpha = 1f;
-            cg.interactable = true;
+            if (cg != null) {
+                cg.alpha = 1f;
+                cg.interactable = true;
+            }
             onOpen.Invoke();
         }
 

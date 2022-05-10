@@ -25,9 +25,11 @@ namespace Sanicball.UI
             {
                 if (port >= LOWEST_PORT_NUM && port <= HIGHEST_PORT_NUM)
                 {
+                    /*
                     //Success, start the server
                     MatchStarter matchStarter = FindObjectOfType<MatchStarter>();
                     matchStarter.JoinOnlineGame(ipInput.text, port);
+                    */
                 }
                 else
                 {

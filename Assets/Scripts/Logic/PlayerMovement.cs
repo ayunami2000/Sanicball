@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using Lidgren.Network;
+//using Lidgren.Network;
 using SanicballCore;
 using UnityEngine;
 
@@ -42,6 +42,7 @@ namespace Sanicball.Logic
                 );
         }
 
+        /*
         public void WriteToMessage(NetBuffer msg)
         {
             msg.Write(ClientGuid);
@@ -65,5 +66,6 @@ namespace Sanicball.Logic
                 msg.ReadVector3()
                 );
         }
+        */
     }
 }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using Lidgren.Network;
+//using Lidgren.Network;
 using SanicballCore;
 using UnityEngine;
 
 namespace Sanicball.Logic
 {
+    /*
     public class DisconnectArgs : EventArgs
     {
         public string Reason { get; private set; }
@@ -160,4 +161,5 @@ namespace Sanicball.Logic
             }
         }
     }
+    */
 }
