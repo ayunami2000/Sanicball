@@ -41,9 +41,9 @@ namespace Sanicball.Logic
                 );
         }
 
-        /*
-        public void WriteToMessage(NetBuffer msg)
+        public void WriteToMessage(Stream msg)
         {
+            //todo: fix these!!
             msg.Write(ClientGuid);
             msg.Write((byte)CtrlType);
             msg.Write(Position);
@@ -53,7 +53,7 @@ namespace Sanicball.Logic
             msg.Write(DirectionVector);
         }
 
-        public static PlayerMovement ReadFromMessage(NetBuffer msg)
+        public static PlayerMovement ReadFromMessage(Stream msg)
         {
             return new PlayerMovement(
                 msg.ReadGuid(),
@@ -65,6 +65,5 @@ namespace Sanicball.Logic
                 msg.ReadVector3()
                 );
         }
-        */
     }
 }

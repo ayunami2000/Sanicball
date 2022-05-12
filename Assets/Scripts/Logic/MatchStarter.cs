@@ -1,5 +1,6 @@
 ﻿using SanicballCore;
 using UnityEngine;
+using HybridWebSocket;
 
 namespace Sanicball.Logic
 {
@@ -16,7 +17,7 @@ namespace Sanicball.Logic
 
         private UI.PopupConnecting activeConnectingPopup;
 
-        //NetClient for when joining online matches
+        //WebSocket for when joining online matches
         private WebSocket joiningClient;
 
         private void Update()
@@ -41,7 +42,10 @@ namespace Sanicball.Logic
             {
                 //Create approval message
                 ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
-                ws.Send(OnlineMatchMessenger.Cereal(info, MessageType.MatchMessage));
+                Stream msg = OnlineMatchMessenger.CerealOne();
+                msg.Write(MessageType.MatchMessage);
+                OnlineMatchMessenger.CerealTwo(msg, info);
+                OnlineMatchMessenger.CerealThree(msg, ws);
 
                 Debug.Log("Connected! Now waiting for match state");
                 activeConnectingPopup.ShowMessage("Receiving match state...");
