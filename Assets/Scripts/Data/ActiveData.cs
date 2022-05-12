@@ -171,7 +171,7 @@ namespace Sanicball.Data
                         Debug.LogError("Failed to load " + filename + ": file is empty.");
                     }
                 }
-                catch (System.Runtime.Serialization.SerializationException ex) /*System.ArgumentException*/
+                catch (System.Runtime.Serialization.SerializationException ex)
                 {
                     Debug.LogError("Failed to parse " + filename + "! Binary converter info: " + ex.Message);
                 }
