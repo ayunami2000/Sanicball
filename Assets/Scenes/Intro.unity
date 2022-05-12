@@ -365,8 +365,9 @@ MonoBehaviour:
   images:
   - {fileID: 932845008}
   - {fileID: 651264229}
-  imgTime: 1.2
-  fadeTime: 1.2
+  nowLoadingText: {fileID: 0}
+  imgTime: 0.2
+  fadeTime: 0.05
 --- !u!4 &348860867
 Transform:
   m_ObjectHideFlags: 0
