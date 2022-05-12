@@ -96,8 +96,7 @@ namespace Sanicball.Logic
         /// <summary>
         /// True if playing online. Used for enabling online-only behaviour, like the client list and the chat
         /// </summary>
-        //public bool OnlineMode { get { return messenger is OnlineMatchMessenger; } }
-        public bool OnlineMode { get { return false; } }
+        public bool OnlineMode { get { return messenger is OnlineMatchMessenger; } }
 
         /// <summary>
         /// Contains all clients connected to the game. In offline matches this will always only contain one client.
@@ -292,8 +291,7 @@ namespace Sanicball.Logic
             GoToLobby();
         }
 
-        /*
-        public void InitOnlineMatch(Lidgren.Network.NetClient client, MatchState matchState)
+        public void InitOnlineMatch(WebSocket client, MatchState matchState)
         {
             //Create existing clients
             foreach (var clientInfo in matchState.Clients)
@@ -347,7 +345,6 @@ namespace Sanicball.Logic
                 GoToLobby();
             }
         }
-        */
 
         #endregion Match initializing
 
@@ -378,8 +375,7 @@ namespace Sanicball.Logic
             MatchClient myClient = clients.FirstOrDefault(a => a.Guid == myGuid);
             messenger.SendMessage(new ChatMessage(myClient.Name, ChatMessageType.User, args.Text));
         }
-        
-        /*
+
         private void OnlinePlayerMovement(object sender, PlayerMovementArgs e)
         {
             MatchPlayer player = players.FirstOrDefault(a => a.ClientGuid == e.Movement.ClientGuid && a.CtrlType == e.Movement.CtrlType);
@@ -388,7 +384,6 @@ namespace Sanicball.Logic
                 player.ProcessMovement(e.Timestamp, e.Movement);
             }
         }
-        */
 
         private void Update()
         {
@@ -427,7 +422,6 @@ namespace Sanicball.Logic
                 autoStartTimer = Mathf.Max(0, autoStartTimer - Time.deltaTime);
             }
 
-            /*
             if (OnlineMode)
             {
                 netUpdateTimer -= Time.deltaTime;
@@ -446,7 +440,6 @@ namespace Sanicball.Logic
                     }
                 }
             }
-            */
         }
 
         public void OnDestroy()
@@ -577,7 +570,7 @@ namespace Sanicball.Logic
 
             string name = clients.First(a => a.Guid == player.ClientGuid).Name + " (" + GameInput.GetControlTypeName(player.CtrlType) + ")";
 
-            player.BallObject = spawner.SpawnBall(PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, name);
+            player.BallObject = spawner.SpawnBall((player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, name);
 
             if (player.ClientGuid != myGuid)
             {

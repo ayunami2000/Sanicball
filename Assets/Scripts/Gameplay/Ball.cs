@@ -378,8 +378,7 @@ namespace Sanicball.Gameplay
 
             if (c)
             {
-                if (CheckpointPassed != null)
-                    CheckpointPassed(this, new CheckpointPassArgs(c));
+                CheckpointPassed?.Invoke(this, new CheckpointPassArgs(c));
             }
 
             if (other.GetComponent<TriggerRespawn>())

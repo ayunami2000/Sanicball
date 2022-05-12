@@ -1,4 +1,5 @@
 ﻿using Sanicball.Logic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,21 +16,15 @@ namespace Sanicball.UI
         [SerializeField]
         private Text pingText = null;
 
-        private ServerInfo info;
-        private System.Net.IPEndPoint endpoint;
+        public Guid Id { get; private set; }
 
-        public void Init(ServerInfo info, System.Net.IPEndPoint endpoint, int pingMs, bool isLocal)
+        public void Init(Guid id, string name, bool inRace, int players, int maxPlayers)
         {
-            serverNameText.text = info.Config.ServerName;
-            serverStatusText.text = info.InRace ? "In race" : "In lobby";
-            if (isLocal)
-            {
-                serverStatusText.text += " - LAN server";
-            }
-            playerCountText.text = info.Players + "/" + info.Config.MaxPlayers;
-            pingText.text = pingMs + "ms";
+            Id = id;
 
-            this.endpoint = endpoint;
+            serverNameText.text = name;
+            serverStatusText.text = inRace ? "In race" : "In lobby";
+            playerCountText.text = players + "/" + maxPlayers;
         }
 
         public void Join()
@@ -37,7 +32,7 @@ namespace Sanicball.UI
             MatchStarter starter = FindObjectOfType<MatchStarter>();
             if (starter)
             {
-                //starter.JoinOnlineGame(endpoint);
+                starter.JoinOnlineGame(Id);
             }
             else
             {

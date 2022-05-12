@@ -9,8 +9,6 @@ namespace Sanicball.UI
         [SerializeField]
         private InputField ipInput;
         [SerializeField]
-        private InputField portInput;
-        [SerializeField]
         private Text portOutput;
 
         private const int LOWEST_PORT_NUM = 1024;
@@ -19,26 +17,15 @@ namespace Sanicball.UI
         public void Connect()
         {
             portOutput.text = "";
-
-            int port;
-            if (int.TryParse(portInput.text, out port))
+            
+            if (System.Uri.TryCreate(ipInput.text, System.UriKind.Absolute, out var uri))
             {
-                if (port >= LOWEST_PORT_NUM && port <= HIGHEST_PORT_NUM)
-                {
-                    /*
-                    //Success, start the server
-                    MatchStarter matchStarter = FindObjectOfType<MatchStarter>();
-                    matchStarter.JoinOnlineGame(ipInput.text, port);
-                    */
-                }
-                else
-                {
-                    portOutput.text = "Port number must be between " + LOWEST_PORT_NUM + " and " + HIGHEST_PORT_NUM + ".";
-                }
+                var matchStarter = FindObjectOfType<MatchStarter>();
+                StartCoroutine(matchStarter.JoinOnlineGame(uri));
             }
             else
             {
-                portOutput.text = "Port must be a number!";
+                portOutput.text = "URL must be valid!";
             }
         }
     }

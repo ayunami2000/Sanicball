@@ -9,14 +9,11 @@ namespace Sanicball.Data
         public string nickname = "";
 		public string serverListURL = "http://ayunami2000.pythonanywhere.com/servers/";
 
-        public string gameJoltUsername;
-        public string gameJoltToken;
-
         [Header("Display")]
         public int resolution = 0;
 
         public bool fullscreen = true;
-        public bool vsync = false;
+        public bool vsync = true;
         public bool useImperial = false;
         public bool showControlsWhileWaiting = true;
 
@@ -50,8 +47,6 @@ namespace Sanicball.Data
         {
             nickname = original.nickname;
 			serverListURL = original.serverListURL;
-            gameJoltUsername = original.gameJoltUsername;
-            gameJoltToken = original.gameJoltToken;
 
             resolution = original.resolution;
             fullscreen = original.fullscreen;

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-//using Lidgren.Network;
+using System.IO;
 using SanicballCore;
 using UnityEngine;
 
@@ -42,8 +42,7 @@ namespace Sanicball.Logic
                 );
         }
 
-        /*
-        public void WriteToMessage(NetBuffer msg)
+        public void WriteToMessage(BinaryWriter msg)
         {
             msg.Write(ClientGuid);
             msg.Write((byte)CtrlType);
@@ -54,7 +53,7 @@ namespace Sanicball.Logic
             msg.Write(DirectionVector);
         }
 
-        public static PlayerMovement ReadFromMessage(NetBuffer msg)
+        public static PlayerMovement ReadFromMessage(BinaryReader msg)
         {
             return new PlayerMovement(
                 msg.ReadGuid(),
@@ -66,6 +65,5 @@ namespace Sanicball.Logic
                 msg.ReadVector3()
                 );
         }
-        */
     }
 }

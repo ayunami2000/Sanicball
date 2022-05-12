@@ -1,5 +1,8 @@
-﻿//using Lidgren.Network;
+﻿using Newtonsoft.Json;
+using Sanicball.Data;
 using SanicballCore;
+using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Sanicball.Logic
@@ -18,136 +21,113 @@ namespace Sanicball.Logic
         private UI.PopupConnecting activeConnectingPopup;
 
         //NetClient for when joining online matches
-        //private NetClient joiningClient;
+        private WebSocket joiningClient;
 
-        private void Update()
+        internal void JoinOnlineGame(Guid id)
         {
-            /*
-            if (joiningClient != null)
-            {
-                NetIncomingMessage msg;
-                while ((msg = joiningClient.ReadMessage()) != null)
-                {
-                    switch (msg.MessageType)
-                    {
-                        case NetIncomingMessageType.DebugMessage:
-                        case NetIncomingMessageType.VerboseDebugMessage:
-                            Debug.Log(msg.ReadString());
-                            break;
+            var baseUri = new Uri(ActiveData.GameSettings.serverListURL);
+            var uri = new UriBuilder(new Uri(baseUri, id.ToString())) { Scheme = baseUri.Scheme == "https" ? "wss" : "ws" };
 
-                        case NetIncomingMessageType.WarningMessage:
-                            Debug.LogWarning(msg.ReadString());
-                            break;
-
-                        case NetIncomingMessageType.ErrorMessage:
-                            Debug.LogError(msg.ReadString());
-                            break;
-
-                        case NetIncomingMessageType.StatusChanged:
-                            NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
-
-                            switch (status)
-                            {
-                                case NetConnectionStatus.Connected:
-                                    Debug.Log("Connected! Now waiting for match state");
-                                    activeConnectingPopup.ShowMessage("Receiving match state...");
-                                    break;
-
-                                case NetConnectionStatus.Disconnected:
-                                    activeConnectingPopup.ShowMessage(msg.ReadString());
-                                    break;
-
-                                default:
-                                    string statusMsg = msg.ReadString();
-                                    Debug.Log("Status change received: " + status + " - Message: " + statusMsg);
-                                    break;
-                            }
-                            break;
-
-                        case NetIncomingMessageType.Data:
-                            byte type = msg.ReadByte();
-                            if (type == MessageType.InitMessage)
-                            {
-                                try
-                                {
-                                    MatchState matchInfo = MatchState.ReadFromMessage(msg);
-                                    BeginOnlineGame(matchInfo);
-                                }
-                                catch (System.Exception ex)
-                                {
-                                    activeConnectingPopup.ShowMessage("Failed to read match message - cannot join server!");
-                                    Debug.LogError("Could not read match state, error: " + ex.Message);
-                                }
-
-                                /*string matchStateStr = "";
-                                try
-                                {
-                                    matchStateStr = msg.ReadString();
-                                    MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(matchStateStr);
-                                    BeginOnlineGame(matchInfo);
-                                }
-                                catch (Newtonsoft.Json.JsonException ex)
-                                {
-                                    activeConnectingPopup.ShowMessage("Failed to read match state - cannot join server!");
-                                    joiningClient.Disconnect("Failed to read match state");
-                                    Debug.LogError("Could not read match state, error: " + ex.Message);
-                                    Debug.LogError("Full message: " + matchStateStr);
-                                }*//*
-                            }
-                            break;
-                    }
-                }
-                if (Input.GetKeyDown(KeyCode.Escape))
-                {
-                    popupHandler.CloseActivePopup();
-                    joiningClient.Disconnect("Cancelled");
-                    joiningClient = null;
-                }
-            }
-            */
+            StartCoroutine(JoinOnlineGame(uri.Uri));
         }
 
         public void BeginLocalGame()
         {
-            MatchManager manager = Instantiate(matchManagerPrefab);
+            var manager = Instantiate(matchManagerPrefab);
             manager.InitLocalMatch();
         }
 
-        /*
-        public void JoinOnlineGame(string ip = "127.0.0.1", int port = 25000)
+        public IEnumerator JoinOnlineGame(Uri endpoint)
         {
-            JoinOnlineGame(new System.Net.IPEndPoint(System.Net.IPAddress.Parse(ip), port));
-        }
-        */
-
-        /*
-        public void JoinOnlineGame(System.Net.IPEndPoint endpoint)
-        {
-            NetPeerConfiguration conf = new NetPeerConfiguration(APP_ID);
-            joiningClient = new NetClient(conf);
-            joiningClient.Start();
-
-            //Create approval message
-            NetOutgoingMessage approval = joiningClient.CreateMessage();
-
-            ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
-            approval.Write(Newtonsoft.Json.JsonConvert.SerializeObject(info));
-
-            joiningClient.Connect(endpoint, approval);
+            joiningClient = new WebSocket(endpoint);
 
             popupHandler.OpenPopup(connectingPopupPrefab);
-
             activeConnectingPopup = FindObjectOfType<UI.PopupConnecting>();
-        }
-        */
 
-        /*
+            yield return StartCoroutine(joiningClient.Connect());
+
+            if (joiningClient.error != null)
+            {
+                activeConnectingPopup.ShowMessage($"Failed to join! {joiningClient.error}");
+            }
+            else
+            {
+                using (var newMessage = new MessageWrapper(MessageTypes.Connect))
+                {
+                    var info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
+                    newMessage.Writer.Write(JsonConvert.SerializeObject(info));
+                    var buffer = newMessage.GetBytes();
+                    joiningClient.Send(buffer);
+                }
+
+                var done = false;
+                byte[] msg;
+                while (!done && joiningClient != null)
+                {
+                    msg = joiningClient.Recv();
+                    if (msg != null)
+                    {
+                        using (var message = new MessageWrapper(msg))
+                        {
+                            switch (message.Type)
+                            {                                
+                                case MessageTypes.Validate: // should only be recieved if validation fails
+
+                                    var valid = message.Reader.ReadBoolean();
+                                    if (!valid)
+                                    {
+                                        var str = message.Reader.ReadString();
+                                        activeConnectingPopup.ShowMessage($"Failed to join! {str}");
+                                        joiningClient.Close();
+                                        joiningClient = null;
+                                    }
+
+                                    break;
+
+                                case MessageTypes.Connect:
+                                    Debug.Log("Connected! Now waiting for match state");
+                                    activeConnectingPopup.ShowMessage("Receiving match state...");
+
+                                    try
+                                    {
+                                        var str = message.Reader.ReadString();
+                                        var matchInfo = JsonConvert.DeserializeObject<MatchState>(str);
+                                        done = true;
+                                        BeginOnlineGame(matchInfo);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        activeConnectingPopup.ShowMessage("Failed to read match message - cannot join server!");
+                                        Debug.LogError("Could not read match state, error: " + ex.Message);
+                                    }
+
+                                    break;
+
+                                case MessageTypes.Disconnect:
+                                    activeConnectingPopup.ShowMessage(message.Reader.ReadString());
+                                    break;
+                            }
+                        }
+                    }
+
+
+                    if (Input.GetKeyDown(KeyCode.Escape))
+                    {
+                        popupHandler.CloseActivePopup();
+                        joiningClient.Close();
+                        joiningClient = null;
+                    }
+
+                    yield return null;
+                }
+            }
+        }
+
         //Called when succesfully connected to a server
         private void BeginOnlineGame(MatchState matchState)
         {
-            MatchManager manager = Instantiate(matchManagerPrefab);
+            var manager = Instantiate(matchManagerPrefab);
             manager.InitOnlineMatch(joiningClient, matchState);
         }
-        */
     }
 }

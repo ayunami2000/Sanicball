@@ -1,9 +1,8 @@
+using Newtonsoft.Json;
+using SanicballCore;
 using System.Collections.Generic;
 using System.IO;
-using SanicballCore;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Sanicball.Data
 {
@@ -31,9 +30,6 @@ namespace Sanicball.Data
         private CharacterInfo[] characters;
 
         [SerializeField]
-        private GameJoltInfo gameJoltInfo;
-
-        [SerializeField]
         private GameObject christmasHat;
         [SerializeField]
         private Material eSportsTrail;
@@ -55,25 +51,28 @@ namespace Sanicball.Data
 
         public static StageInfo[] Stages { get { return instance.stages; } }
         public static CharacterInfo[] Characters { get { return instance.characters; } }
-        public static GameJoltInfo GameJoltInfo { get { return instance.gameJoltInfo; } }
         public static GameObject ChristmasHat { get { return instance.christmasHat; } }
-        public static Material ESportsTrail {get{return instance.eSportsTrail;}}
-        public static GameObject ESportsHat {get{return instance.eSportsHat;}}
-        public static AudioClip ESportsMusic {get{return instance.eSportsMusic;}}
-        public static ESportMode ESportsPrefab {get{return instance.eSportsPrefab;}}
+        public static Material ESportsTrail { get { return instance.eSportsTrail; } }
+        public static GameObject ESportsHat { get { return instance.eSportsHat; } }
+        public static AudioClip ESportsMusic { get { return instance.eSportsMusic; } }
+        public static ESportMode ESportsPrefab { get { return instance.eSportsPrefab; } }
 
-        public static bool ESportsFullyReady {
-            get {
-                bool possible = false;
+        public static bool ESportsFullyReady
+        {
+            get
+            {
+                var possible = false;
                 if (GameSettings.eSportsReady)
                 {
-                    Sanicball.Logic.MatchManager m = FindObjectOfType<Sanicball.Logic.MatchManager>();
+                    var m = FindObjectOfType<Sanicball.Logic.MatchManager>();
                     if (m)
                     {
                         var players = m.Players;
-                        foreach (var p in players) {
-                            if (p.CtrlType != SanicballCore.ControlType.None) {
-                                if (p.CharacterId == 13) 
+                        foreach (var p in players)
+                        {
+                            if (p.CtrlType != SanicballCore.ControlType.None)
+                            {
+                                if (p.CharacterId == 13)
                                 {
                                     possible = true;
                                 }
@@ -110,20 +109,9 @@ namespace Sanicball.Data
         private void OnEnable()
         {
             LoadAll();
-            gameJoltInfo.Init();
         }
 
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            if (!hasFocus) SaveAll();
-        }
-
-        public void Start()
-        {
-            SceneManager.activeSceneChanged += ChangedActiveScene;
-        }
-
-        private void ChangedActiveScene(Scene current, Scene next)
+        private void OnApplicationQuit()
         {
             SaveAll();
         }
@@ -134,32 +122,31 @@ namespace Sanicball.Data
 
         public void LoadAll()
         {
-            Load("GameSettings", ref gameSettings);
-            Load("GameKeybinds", ref keybinds);
-            Load("MatchSettings", ref matchSettings);
-            Load("Records", ref raceRecords);
+            Load("GameSettings.json", ref gameSettings);
+            Load("GameKeybinds.json", ref keybinds);
+            Load("MatchSettings.json", ref matchSettings);
+            Load("Records.json", ref raceRecords);
         }
 
         public void SaveAll()
         {
-            Save("GameSettings", gameSettings);
-            Save("GameKeybinds", keybinds);
-            Save("MatchSettings", matchSettings);
-            Save("Records", raceRecords);
+            Save("GameSettings.json", gameSettings);
+            Save("GameKeybinds.json", keybinds);
+            Save("MatchSettings.json", matchSettings);
+            Save("Records.json", raceRecords);
         }
 
         private void Load<T>(string filename, ref T output)
         {
-            string fullPath = Application.persistentDataPath + "/" + filename;
+            var fullPath = Application.persistentDataPath + "/" + filename;
             if (File.Exists(fullPath))
             {
-                //Deserialize from binary into a data object
+                //Load file contents
+                var dataString = File.ReadAllText(fullPath);
+                //Deserialize from JSON into a data object
                 try
                 {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    FileStream file = File.Open(fullPath, FileMode.Open);
-                    var dataObj = (T)bf.Deserialize(file);
-                    file.Close();
+                    var dataObj = JsonConvert.DeserializeObject<T>(dataString);
                     //Make sure an object was created, this would't end well with a null value
                     if (dataObj != null)
                     {
@@ -171,9 +158,9 @@ namespace Sanicball.Data
                         Debug.LogError("Failed to load " + filename + ": file is empty.");
                     }
                 }
-                catch (System.Runtime.Serialization.SerializationException ex)
+                catch (JsonException ex)
                 {
-                    Debug.LogError("Failed to parse " + filename + "! Binary converter info: " + ex.Message);
+                    Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
                 }
             }
             else
@@ -184,10 +171,8 @@ namespace Sanicball.Data
 
         private void Save(string filename, object objToSave)
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/" + filename, FileMode.OpenOrCreate);
-            bf.Serialize(file, objToSave);
-            file.Close();
+            var data = JsonConvert.SerializeObject(objToSave);
+            File.WriteAllText(Application.persistentDataPath + "/" + filename, data);
             Debug.Log(filename + " saved successfully.");
         }
 

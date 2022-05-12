@@ -68,7 +68,6 @@ namespace Sanicball.UI
 
             nickname.text = tempSettings.nickname;
 			serverListURL.text = tempSettings.serverListURL;
-            gameJoltAccount.text = (!string.IsNullOrEmpty(tempSettings.gameJoltToken)) ? "Linked as " + tempSettings.gameJoltUsername : "Not linked";
 
             if (Screen.resolutions.Length > 0)
             {
@@ -121,13 +120,6 @@ namespace Sanicball.UI
 			UpdateFields ();
 		}
 
-        public void SetGameJoltInfo(string username, string token)
-        {
-            tempSettings.gameJoltUsername = username;
-            tempSettings.gameJoltToken = token;
-            UpdateFields();
-        }
-
         //Used in the popup script for changing nickname
         public string GetNickname()
         {
@@ -138,16 +130,6 @@ namespace Sanicball.UI
 		{
 			return tempSettings.serverListURL;
 		}
-
-        public string GetGameJoltUsername()
-        {
-            return tempSettings.gameJoltUsername;
-        }
-
-        public string GetGameJoltToken()
-        {
-            return tempSettings.gameJoltToken;
-        }
 
         public void ResolutionUp()
         {

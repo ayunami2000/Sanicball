@@ -1,13 +1,11 @@
-﻿using System;
+﻿using SanicballCore;
+using System;
 using System.Collections;
 using System.Reflection;
-//using Lidgren.Network;
-using SanicballCore;
 using UnityEngine;
 
 namespace Sanicball.Logic
 {
-    /*
     public class DisconnectArgs : EventArgs
     {
         public string Reason { get; private set; }
@@ -20,10 +18,10 @@ namespace Sanicball.Logic
 
     public class PlayerMovementArgs : EventArgs
     {
-        public double Timestamp { get; private set; }
+        public long Timestamp { get; private set; }
         public PlayerMovement Movement { get; private set; }
 
-        public PlayerMovementArgs(double timestamp, PlayerMovement movement)
+        public PlayerMovementArgs(long timestamp, PlayerMovement movement)
         {
             Timestamp = timestamp;
             Movement = movement;
@@ -34,7 +32,7 @@ namespace Sanicball.Logic
     {
         public const string APP_ID = "Sanicball";
 
-        private NetClient client;
+        private WebSocket client;
 
         //Settings to use for both serializing and deserializing messages
         private Newtonsoft.Json.JsonSerializerSettings serializerSettings;
@@ -42,118 +40,104 @@ namespace Sanicball.Logic
         public event EventHandler<PlayerMovementArgs> OnPlayerMovement;
         public event EventHandler<DisconnectArgs> Disconnected;
 
-        public OnlineMatchMessenger(NetClient client)
+        public OnlineMatchMessenger(WebSocket client)
         {
             this.client = client;
 
-            serializerSettings = new Newtonsoft.Json.JsonSerializerSettings();
-            serializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All;
+            serializerSettings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All
+            };
         }
 
         public override void SendMessage<T>(T message)
         {
-            NetOutgoingMessage netMessage = client.CreateMessage();
-            netMessage.Write(MessageType.MatchMessage);
-            netMessage.WriteTime(false);
+            var net = new MessageWrapper(MessageTypes.Match);
+            net.Writer.Write(DateTime.Now.Ticks);
 
-            string data = Newtonsoft.Json.JsonConvert.SerializeObject(message, serializerSettings);
-            netMessage.Write(data);
+            var data = Newtonsoft.Json.JsonConvert.SerializeObject(message, serializerSettings);
+            net.Writer.Write(data);
 
-            client.SendMessage(netMessage, NetDeliveryMethod.ReliableOrdered);
+            client.Send(net.GetBytes());
+            net.Dispose();
         }
 
         public void SendPlayerMovement(MatchPlayer player)
         {
-            NetOutgoingMessage msg = client.CreateMessage();
-            msg.Write(MessageType.PlayerMovementMessage);
-            msg.WriteTime(false);
-            PlayerMovement movement = Logic.PlayerMovement.CreateFromPlayer(player);
-            movement.WriteToMessage(msg);
-            client.SendMessage(msg, NetDeliveryMethod.Unreliable);
+            var msg = new MessageWrapper(MessageTypes.PlayerMovement);
+            msg.Writer.Write(DateTime.Now.Ticks);
+
+            var movement = Logic.PlayerMovement.CreateFromPlayer(player);
+            movement.WriteToMessage(msg.Writer);
+            client.Send(msg.GetBytes());
         }
 
         public override void UpdateListeners()
         {
-            NetIncomingMessage msg;
-            while ((msg = client.ReadMessage()) != null)
+            if (client.error != null)
             {
-                switch (msg.MessageType)
+                Disconnected?.Invoke(this, new DisconnectArgs($"You were disconnected from the server. {client.error}"));
+            }
+
+            byte[] msg;
+            while ((msg = client.Recv()) != null)
+            {
+                using (var message = new MessageWrapper(msg))
                 {
-                    case NetIncomingMessageType.DebugMessage:
-                    case NetIncomingMessageType.VerboseDebugMessage:
-                        Debug.Log(msg.ReadString());
-                        break;
+                    switch (message.Type)
+                    {
+                        case MessageTypes.Disconnect:
+                            Disconnected?.Invoke(this, new DisconnectArgs(message.Reader.ReadString()));
+                            break;
 
-                    case NetIncomingMessageType.WarningMessage:
-                        Debug.LogWarning(msg.ReadString());
-                        break;
+                        case MessageTypes.Match:
+                            var timestamp = message.Reader.ReadInt64();
+                            var value = message.Reader.ReadString();
 
-                    case NetIncomingMessageType.ErrorMessage:
-                        Debug.LogError(msg.ReadString());
-                        break;
+                            Debug.Log(value);
 
-                    case NetIncomingMessageType.StatusChanged:
-                        NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
-                        string statusMsg = msg.ReadString();
+                            var matchMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchMessage>(value, serializerSettings);
 
-                        switch (status)
-                        {
-                            case NetConnectionStatus.Disconnected:
-                                if (Disconnected != null)
-                                    Disconnected(this, new DisconnectArgs(statusMsg));
-                                break;
+                            Debug.Log(matchMessage.GetType());
 
-                            default:
-                                Debug.Log("Status change received: " + status + " - Message: " + statusMsg);
-                                break;
-                        }
-                        break;
+                            //Use reflection to call ReceiveMessage with the proper type parameter
+                            var methodToCall = typeof(OnlineMatchMessenger).GetMethod("ReceiveMessage", BindingFlags.NonPublic | BindingFlags.Instance);
+                            var genericVersion = methodToCall.MakeGenericMethod(matchMessage.GetType());
+                            genericVersion.Invoke(this, new object[] { matchMessage, timestamp });
 
-                    case NetIncomingMessageType.Data:
+                            break;
 
-                        switch (msg.ReadByte())
-                        {
-                            case MessageType.MatchMessage:
-                                double timestamp = msg.ReadTime(false);
-                                MatchMessage message = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), serializerSettings);
+                        case MessageTypes.PlayerMovement:
+                            timestamp = message.Reader.ReadInt64();
+                            var movement = PlayerMovement.ReadFromMessage(message.Reader);
+                            OnPlayerMovement?.Invoke(this, new PlayerMovementArgs(timestamp, movement));
+                            break;
 
-                                //Use reflection to call ReceiveMessage with the proper type parameter
-                                MethodInfo methodToCall = typeof(OnlineMatchMessenger).GetMethod("ReceiveMessage", BindingFlags.NonPublic | BindingFlags.Instance);
-                                MethodInfo genericVersion = methodToCall.MakeGenericMethod(message.GetType());
-                                genericVersion.Invoke(this, new object[] { message, timestamp });
-
-                                break;
-
-                            case MessageType.PlayerMovementMessage:
-                                double time = msg.ReadTime(false);
-                                PlayerMovement movement = PlayerMovement.ReadFromMessage(msg);
-                                if (OnPlayerMovement != null)
-                                {
-                                    OnPlayerMovement(this, new PlayerMovementArgs(time, movement));
-                                }
-                                break;
-                        }
-                        break;
-
-                    default:
-                        Debug.Log("Received unhandled message of type " + msg.MessageType);
-                        break;
+                        default:
+                            Debug.Log("Received unhandled message of type " + message.Type);
+                            break;
+                    }
                 }
             }
         }
 
         public override void Close()
         {
-            client.Disconnect("Client left the match");
+            using (var message = new MessageWrapper(MessageTypes.Disconnect))
+            {
+                message.Writer.Write("Client disconnecting");
+                client.Send(message.GetBytes());
+                client.Close();
+            }
         }
 
-        private void ReceiveMessage<T>(T message, double timestamp) where T : MatchMessage
+        private void ReceiveMessage<T>(T message, long timestamp) where T : SanicballCore.MatchMessage
         {
-            float travelTime = (float)(NetTime.Now - timestamp);
+            var travelTime = (float)(DateTime.Now.Ticks - timestamp) / TimeSpan.TicksPerSecond;
 
-            for (int i = 0; i < listeners.Count; i++)
+            for (var i = 0; i < listeners.Count; i++)
             {
-                MatchMessageListener listener = listeners[i];
+                var listener = listeners[i];
                 if (listener.MessageType == message.GetType())
                 {
                     ((MatchMessageHandler<T>)listener.Handler).Invoke(message, travelTime);
@@ -161,5 +145,4 @@ namespace Sanicball.Logic
             }
         }
     }
-    */
 }
