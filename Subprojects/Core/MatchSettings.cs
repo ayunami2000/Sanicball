@@ -36,10 +36,9 @@ namespace SanicballCore
         WeightedRandom // Most chance for normal, small chance for odd, smaller chance for hyper
     }
 
-    [System.Serializable]
     public struct MatchSettings
     {
-        //[Newtonsoft.Json.JsonProperty]
+        [Newtonsoft.Json.JsonProperty]
         private string aiCharacters;
 
         public int StageId { get; set; }
@@ -74,7 +73,7 @@ namespace SanicballCore
                 AutoStartMinPlayers = 2,
                 AutoReturnTime = 15,
                 VoteRatio = 1f,
-                StageRotationMode = StageRotationMode.None,
+                StageRotationMode = StageRotationMode.Random,
 				AllowedTiers = AllowedTiers.All,
                 TierRotationMode = TierRotationMode.None,
                 DisqualificationTime = 120

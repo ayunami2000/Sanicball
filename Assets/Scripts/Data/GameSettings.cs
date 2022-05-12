@@ -7,7 +7,7 @@ namespace Sanicball.Data
     {
         [Header("Online")]
         public string nickname = "";
-		public string serverListURL = "http://ayunami2000.pythonanywhere.com/servers/";
+		public string serverListURL = "http://localhost/servers.txt";
 
         [Header("Display")]
         public int resolution = 0;

@@ -14,12 +14,6 @@ namespace SanicballServer
     {
         private static CommandQueue commandQueue = new CommandQueue();
 
-        public static void Send(this WebSocketWrapper client, MessageTypes type, BinaryWriter writer, MemoryStream dest)
-        {
-            writer.Flush();
-            client.Send(type, dest.ToArray());
-        }
-
         private static async Task Main(string[] args)
         {
             bool serverClosed = false;
