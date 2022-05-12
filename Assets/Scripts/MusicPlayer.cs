@@ -109,8 +109,8 @@ namespace Sanicball
                 aSource.volume = Mathf.Min(aSource.volume + Time.deltaTime * 0.1f, 0.5f);
             }
             //If it's not playing but supposed to play, change song
-            float currTime = aSource.clip == null ? 0 : (aSource.clip.length - 0.1f);
-            if ((aSource.time >= currTime || GameInput.IsChangingSong()) && isPlaying)
+            float currTime = aSource.clip == null ? 0 : (aSource.clip.length - Time.deltaTime);
+            if ((aSource.clip == null || aSource.time >= currTime || GameInput.IsChangingSong()) && isPlaying)
             {
                 if (currentSongID < playlist.Length - 1)
                 {
@@ -120,6 +120,7 @@ namespace Sanicball
                 {
                     currentSongID = 0;
                 }
+                aSource.time = 0f;
                 aSource.clip = playlist[currentSongID].clip;
                 slidePosition = slidePositionMax;
                 //todo: fix audio stopping randomly...
