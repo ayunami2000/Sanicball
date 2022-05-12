@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-//using Lidgren.Network;
 using SanicballCore;
 using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Sanicball.Logic
 {
-    /*
     public class DisconnectArgs : EventArgs
     {
         public string Reason { get; private set; }
@@ -160,6 +159,43 @@ namespace Sanicball.Logic
                 }
             }
         }
+
+        public byte[] Cereal(T thing, byte messageType)
+        {
+            Stream message = new MemoryStream();
+            message.write(messageType);
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(message, "test");
+            return ReadFully(message);
+        }
+
+        public T UnCereal(byte[] thing)
+        {
+            try
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                var dataObj = (T)bf.Deserialize(new MemoryStream(thing.Skip(1).ToArray()));
+                return dataObj;
+            }
+            catch (System.Runtime.Serialization.SerializationException ex)
+            {
+                Debug.LogError("Failed to parse! Binary converter info: " + ex.Message);
+                return null;
+            }
+        }
+
+        public static byte[] ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[16*1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
     }
-    */
 }
