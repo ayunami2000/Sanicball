@@ -16,9 +16,9 @@ namespace Sanicball.UI
         [SerializeField]
         private Text pingText = null;
 
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
 
-        public void Init(Guid id, string name, bool inRace, int players, int maxPlayers)
+        public void Init(string id, string name, bool inRace, int players, int maxPlayers)
         {
             Id = id;
 
@@ -32,7 +32,7 @@ namespace Sanicball.UI
             MatchStarter starter = FindObjectOfType<MatchStarter>();
             if (starter)
             {
-                starter.JoinOnlineGame(Id);
+                starter.JoinOnlineGame(new Uri(Id, UriKind.Absolute));
             }
             else
             {

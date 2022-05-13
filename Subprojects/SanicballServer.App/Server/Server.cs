@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 //using System.Threading.Tasks;
-using Newtonsoft.Json;
+using static SanicballCore.Cerealizer;
 using SanicballCore.MatchMessages;
 using SanicballServer;
 
@@ -240,7 +240,7 @@ namespace SanicballCore.Server
             "Shows match settings. Settings like stage rotation are just shown as a number (Example: if StageRotationMode shows '1', it means 'Sequenced')",
           cmd =>
             {
-                Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
+                Log("not implemented");
             });
 
             AddCommandHandler("reloadMOTD",
@@ -587,15 +587,10 @@ namespace SanicballCore.Server
                                 switch (msg.Type)
                                 {
                                     case MessageTypes.Connect:
-
-                                        ClientInfo clientInfo = null;
-                                        try
+                                        ClientInfo clientInfo = UnCerealReader<ClientInfo>(msg.Reader);
+                                        if (clientInfo == null)
                                         {
-                                            clientInfo = JsonConvert.DeserializeObject<ClientInfo>(msg.Reader.ReadString());
-                                        }
-                                        catch (JsonException ex)
-                                        {
-                                            Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
+                                            Log("Error reading client connection approval. Client rejected.");
 
                                             writer.Write(false);
                                             writer.Write("Invalid client info! You are likely using a different game version than the server.");
@@ -633,7 +628,7 @@ namespace SanicballCore.Server
 
 
                                         var state = new MatchState(clientStates, playerStates, matchSettings, inRace, autoStartTimeLeft);
-                                        var str = JsonConvert.SerializeObject(state);
+                                        var str = Cereal(state);
                                         writer.Write(str);
 
                                         await client.Value.Send(MessageTypes.Connect, writer, dest);
@@ -694,14 +689,10 @@ namespace SanicballCore.Server
                                         break;
                                     case MessageTypes.Match:
                                         double timestamp = msg.Reader.ReadInt64();
-                                        MatchMessage matchMessage = null;
-                                        try
+                                        MatchMessage matchMessage = UnCerealReader<MatchMessage>(msg.Reader);
+                                        if (matchMessage == null)
                                         {
-                                            matchMessage = JsonConvert.DeserializeObject<MatchMessage>(msg.Reader.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                                        }
-                                        catch (JsonException ex)
-                                        {
-                                            Log("Failed to deserialize received match message. Error description: " + ex.Message);
+                                            Log("Failed to deserialize received match message.");
                                             continue; //Skip to next message in queue
                                         }
 
@@ -1215,7 +1206,7 @@ namespace SanicballCore.Server
         private async Task SendToAll(MatchMessage matchMsg)
         {
             //Log("Sending message of type " + matchMsg.GetType() + " to " + clients.Count + " connection(s)", LogLevel.Debug);
-            var matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+            var matchMsgSerialized = Cereal(matchMsg);
 
             using (var memory = new MemoryStream())
             using (var writer = new BinaryWriter(memory, Encoding.UTF8, false))
@@ -1235,7 +1226,7 @@ namespace SanicballCore.Server
         private async Task SendTo(MatchMessage matchMsg, ServClient reciever)
         {
             //Log("Sending message of type " + matchMsg.GetType() + " to client " + reciever.Name, LogLevel.Debug);
-            var matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+            var matchMsgSerialized = Cereal(matchMsg);
 
             using (var memory = new MemoryStream())
             using (var writer = new BinaryWriter(memory, Encoding.UTF8, false))
@@ -1357,7 +1348,7 @@ namespace SanicballCore.Server
         {
             using (var sw = new StreamWriter(SETTINGS_FILENAME))
             {
-                sw.Write(JsonConvert.SerializeObject(matchSettings));
+                sw.Write(Cereal(matchSettings));
             }
         }
 

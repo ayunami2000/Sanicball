@@ -36,9 +36,10 @@ namespace SanicballCore
         WeightedRandom // Most chance for normal, small chance for odd, smaller chance for hyper
     }
 
+    [System.Serializable]
     public struct MatchSettings
     {
-        [Newtonsoft.Json.JsonProperty]
+        //[Newtonsoft.Json.JsonProperty]
         private string aiCharacters;
 
         public int StageId { get; set; }

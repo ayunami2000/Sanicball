@@ -1,8 +1,11 @@
 ﻿using SanicballCore;
 using System;
+using System.IO;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
+using static SanicballCore.Cerealizer;
 
 namespace Sanicball.Logic
 {
@@ -34,20 +37,12 @@ namespace Sanicball.Logic
 
         private WebSocket client;
 
-        //Settings to use for both serializing and deserializing messages
-        private Newtonsoft.Json.JsonSerializerSettings serializerSettings;
-
         public event EventHandler<PlayerMovementArgs> OnPlayerMovement;
         public event EventHandler<DisconnectArgs> Disconnected;
 
         public OnlineMatchMessenger(WebSocket client)
         {
             this.client = client;
-
-            serializerSettings = new Newtonsoft.Json.JsonSerializerSettings
-            {
-                TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All
-            };
         }
 
         public override void SendMessage<T>(T message)
@@ -55,7 +50,10 @@ namespace Sanicball.Logic
             var net = new MessageWrapper(MessageTypes.Match);
             net.Writer.Write(DateTime.Now.Ticks);
 
-            var data = Newtonsoft.Json.JsonConvert.SerializeObject(message, serializerSettings);
+            Stream cereal = CerealOne();
+            CerealTwo<T>(cereal, message);
+
+            var data = CerealThree(cereal);
             net.Writer.Write(data);
 
             client.Send(net.GetBytes());
@@ -92,13 +90,8 @@ namespace Sanicball.Logic
 
                         case MessageTypes.Match:
                             var timestamp = message.Reader.ReadInt64();
-                            var value = message.Reader.ReadString();
 
-                            Debug.Log(value);
-
-                            var matchMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchMessage>(value, serializerSettings);
-
-                            Debug.Log(matchMessage.GetType());
+                            var matchMessage = UnCerealReader<MatchMessage>(message.Reader);
 
                             //Use reflection to call ReceiveMessage with the proper type parameter
                             var methodToCall = typeof(OnlineMatchMessenger).GetMethod("ReceiveMessage", BindingFlags.NonPublic | BindingFlags.Instance);

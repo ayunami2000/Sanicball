@@ -25,8 +25,9 @@ namespace SanicballServer.App
 
         public static async Task StartServer(CommandQueue commandQueue)
         {
-            
-            Server server = new Server(commandQueue, new ServerConfig() { ServerName = "ayunami2000's Ball Pit", MaxPlayers = 16 });
+            ServerConfig serverConfig = new ServerConfig() { ServerName = "ayunami2000's Ball Pit", MaxPlayers = 16 };
+
+            Server server = new Server(commandQueue, serverConfig);
             Task.Run(server.Start);
 
             HttpListener httpListener = new HttpListener();
@@ -42,6 +43,15 @@ namespace SanicballServer.App
                     Console.WriteLine("123");
                     await server.ConnectClientAsync(webSocket);
                     Console.WriteLine("456");
+                }
+                else
+                {
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(serverConfig.ServerName + "<br>" + server.InGame.ToString() + "<br>" + serverConfig.MaxPlayers + "<br>" + server.ConnectedClients);
+                    // Get a response stream and write the response to it.
+                    context.Response.ContentLength64 = buffer.Length;
+                    System.IO.Stream output = context.Response.OutputStream;
+                    output.Write(buffer, 0, buffer.Length);
+                    output.Close();
                 }
             }
         }

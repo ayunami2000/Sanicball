@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
-using Sanicball.Data;
+﻿using Sanicball.Data;
 using SanicballCore;
+using static SanicballCore.Cerealizer;
 using System;
+using System.IO;
 using System.Collections;
 using UnityEngine;
 
@@ -54,9 +55,13 @@ namespace Sanicball.Logic
             {
                 using (var newMessage = new MessageWrapper(MessageTypes.Connect))
                 {
-                    var info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
-                    newMessage.Writer.Write(JsonConvert.SerializeObject(info));
+                    ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
+                    Debug.Log(info);
+                    var crael = Cereal(info);
+                    Debug.Log(System.Text.Encoding.Default.GetString(crael));
+                    newMessage.Writer.Write(crael);
                     var buffer = newMessage.GetBytes();
+                    Debug.Log(buffer.Length);
                     joiningClient.Send(buffer);
                 }
 
@@ -90,8 +95,7 @@ namespace Sanicball.Logic
 
                                     try
                                     {
-                                        var str = message.Reader.ReadString();
-                                        var matchInfo = JsonConvert.DeserializeObject<MatchState>(str);
+                                        var matchInfo = UnCerealReader<MatchState>(message.Reader);
                                         done = true;
                                         BeginOnlineGame(matchInfo);
                                     }

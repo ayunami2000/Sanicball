@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
-using Newtonsoft.Json.Linq;
 using Sanicball.Data;
 using Sanicball.Logic;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
@@ -23,18 +19,16 @@ namespace Sanicball.UI
 
         private List<ServerListItem> servers = new List<ServerListItem>();
 
-        private UnityWebRequest serverBrowserRequester;
-        private DateTime latestLocalRefreshTime;
-        private DateTime latestBrowserRefreshTime;
+        //Stores server browser IPs, so they can be differentiated from LAN servers
+        private List<string> serverBrowserIPs = new List<string>();
+
+        private WWW serverBrowserRequester;
 
         public void RefreshServers()
         {
-            StartCoroutine(RefreshServerRoutine());
-        }
+            serverBrowserIPs.Clear();
 
-        public IEnumerator RefreshServerRoutine()
-        {
-            latestLocalRefreshTime = DateTime.Now;
+			serverBrowserRequester = new WWW(ActiveData.GameSettings.serverListURL);
 
             serverCountField.text = "Refreshing servers, hang on...";
             errorField.enabled = false;
@@ -45,45 +39,6 @@ namespace Sanicball.UI
                 Destroy(serv.gameObject);
             }
             servers.Clear();
-            
-			serverBrowserRequester = UnityWebRequest.Get(ActiveData.GameSettings.serverListURL);
-            yield return serverBrowserRequester.SendWebRequest();
-
-            if(serverBrowserRequester.responseCode == 200)
-            {
-                try
-                {
-                    var results = JArray.Parse(serverBrowserRequester.downloadHandler.text);
-
-                    foreach (var result in results)
-                    {
-                        var server = Instantiate(serverListItemPrefab);
-                        server.transform.SetParent(targetServerListContainer, false);
-
-                        var id = Guid.Parse(result["id"].ToString());
-                        var name = result["name"].ToString();
-                        var inRace = result["inGame"].ToObject<bool>();
-                        var players = result["currentPlayers"].ToObject<int>();
-                        var maxPlayers = result["maxPlayers"].ToObject<int>();
-
-                        server.Init(id, name, inRace, players, maxPlayers);
-                        servers.Add(server);
-                        RefreshNavigation();
-                    }
-
-                    serverCountField.text = results.Count + (results.Count == 1 ? " server" : " servers");
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError("Failed to receive servers - " + ex.Message);
-                    serverCountField.text = "Cannot access server list URL!";
-                }
-            }
-            else
-            {
-                Debug.LogError("Failed to receive servers - " + serverBrowserRequester.error);
-                serverCountField.text = "Cannot access server list URL!";
-            }
         }
 
         private void Awake()
@@ -96,8 +51,48 @@ namespace Sanicball.UI
             //Refresh on f5 (pretty nifty)
             if (Input.GetKeyDown(KeyCode.F5))
             {
-                StartCoroutine(RefreshServerRoutine());
-            }           
+                RefreshServers();
+            }
+
+            //Check for response from the server browser requester
+            if (serverBrowserRequester != null && serverBrowserRequester.isDone)
+            {
+                if (string.IsNullOrEmpty(serverBrowserRequester.error))
+                {
+                    string result = serverBrowserRequester.text;
+                    string[] entries = result.Split(new string[] { "<br>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string entry in entries)
+                    {
+                        WWW discoveryClient = new WWW("http" + entry.Remove(0,2));
+                        System.Threading.Thread discoverThread = new System.Threading.Thread(() => {
+                            while (discoveryClient != null && discoveryClient.isDone) {}
+                            if (string.IsNullOrEmpty(discoveryClient.error))
+                            {
+                                string serverResult = discoveryClient.text;
+                                string[] serverInfo = serverResult.Split(new string[] { "<br>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                                var server = Instantiate(serverListItemPrefab);
+                                server.transform.SetParent(targetServerListContainer, false);
+                                server.Init(entry, serverInfo[0], bool.Parse(serverInfo[1]), int.Parse(serverInfo[2]), int.Parse(serverInfo[3]));
+                                servers.Add(server);
+                                RefreshNavigation();
+
+                                serverCountField.text = servers.Count + (servers.Count == 1 ? " server" : " servers");
+                            }
+                        });
+                        serverBrowserIPs.Add(entry);
+                    }
+					serverCountField.text = "0 servers";
+                }
+                else
+                {
+                    Debug.LogError("Failed to receive servers - " + serverBrowserRequester.error);
+					serverCountField.text = "Cannot access server list URL!";
+                }
+
+                serverBrowserRequester = null;
+            }
         }
 
         private void RefreshNavigation()

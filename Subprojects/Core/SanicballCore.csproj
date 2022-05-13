@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cerealizer.cs" />
     <Compile Include="ClientInfo.cs" />
     <Compile Include="Consts.cs" />
     <Compile Include="ControlType.cs" />

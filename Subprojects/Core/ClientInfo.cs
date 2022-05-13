@@ -1,5 +1,6 @@
 ﻿namespace SanicballCore
 {
+    [System.Serializable]
     public class ClientInfo
     {
         public float Version { get; private set; }

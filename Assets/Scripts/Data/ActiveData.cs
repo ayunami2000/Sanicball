@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Runtime.Serialization.Formatters.Binary;
 using SanicballCore;
 using System.Collections.Generic;
 using System.IO;
@@ -122,31 +122,32 @@ namespace Sanicball.Data
 
         public void LoadAll()
         {
-            Load("GameSettings.json", ref gameSettings);
-            Load("GameKeybinds.json", ref keybinds);
-            Load("MatchSettings.json", ref matchSettings);
-            Load("Records.json", ref raceRecords);
+            Load("GameSettings", ref gameSettings);
+            Load("GameKeybinds", ref keybinds);
+            Load("MatchSettings", ref matchSettings);
+            Load("Records", ref raceRecords);
         }
 
         public void SaveAll()
         {
-            Save("GameSettings.json", gameSettings);
-            Save("GameKeybinds.json", keybinds);
-            Save("MatchSettings.json", matchSettings);
-            Save("Records.json", raceRecords);
+            Save("GameSettings", gameSettings);
+            Save("GameKeybinds", keybinds);
+            Save("MatchSettings", matchSettings);
+            Save("Records", raceRecords);
         }
 
         private void Load<T>(string filename, ref T output)
         {
-            var fullPath = Application.persistentDataPath + "/" + filename;
+            string fullPath = Application.persistentDataPath + "/" + filename;
             if (File.Exists(fullPath))
             {
-                //Load file contents
-                var dataString = File.ReadAllText(fullPath);
-                //Deserialize from JSON into a data object
+                //Deserialize from binary into a data object
                 try
                 {
-                    var dataObj = JsonConvert.DeserializeObject<T>(dataString);
+                    BinaryFormatter bf = new BinaryFormatter();
+                    FileStream file = File.Open(fullPath, FileMode.Open);
+                    var dataObj = (T)bf.Deserialize(file);
+                    file.Close();
                     //Make sure an object was created, this would't end well with a null value
                     if (dataObj != null)
                     {
@@ -158,9 +159,9 @@ namespace Sanicball.Data
                         Debug.LogError("Failed to load " + filename + ": file is empty.");
                     }
                 }
-                catch (JsonException ex)
+                catch (System.Runtime.Serialization.SerializationException ex)
                 {
-                    Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
+                    Debug.LogError("Failed to parse " + filename + "! Binary converter info: " + ex.Message);
                 }
             }
             else
@@ -171,8 +172,10 @@ namespace Sanicball.Data
 
         private void Save(string filename, object objToSave)
         {
-            var data = JsonConvert.SerializeObject(objToSave);
-            File.WriteAllText(Application.persistentDataPath + "/" + filename, data);
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/" + filename, FileMode.OpenOrCreate);
+            bf.Serialize(file, objToSave);
+            file.Close();
             Debug.Log(filename + " saved successfully.");
         }
 
