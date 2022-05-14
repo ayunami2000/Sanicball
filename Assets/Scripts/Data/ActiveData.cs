@@ -3,6 +3,7 @@ using SanicballCore;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Sanicball.Data
 {
@@ -111,7 +112,17 @@ namespace Sanicball.Data
             LoadAll();
         }
 
-        private void OnApplicationQuit()
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus) SaveAll();
+        }
+
+        public void Start()
+        {
+            SceneManager.activeSceneChanged += ChangedActiveScene;
+        }
+
+        private void ChangedActiveScene(Scene current, Scene next)
         {
             SaveAll();
         }
@@ -142,6 +153,7 @@ namespace Sanicball.Data
             if (File.Exists(fullPath))
             {
                 //Deserialize from binary into a data object
+                //Assuming non-malicious because, what, would someone inject malicious code into indexeddb??!?!??!? nahhhhhhhhhhhhhh never!!
                 try
                 {
                     BinaryFormatter bf = new BinaryFormatter();

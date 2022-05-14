@@ -587,7 +587,7 @@ namespace SanicballCore.Server
                                 switch (msg.Type)
                                 {
                                     case MessageTypes.Connect:
-                                        ClientInfo clientInfo = UnCerealReader<ClientInfo>(msg.Reader);
+                                        ClientInfo clientInfo = UnCereal<ClientInfo>(ReadAllBytes(msg.Reader));
                                         if (clientInfo == null)
                                         {
                                             Log("Error reading client connection approval. Client rejected.");
@@ -689,7 +689,7 @@ namespace SanicballCore.Server
                                         break;
                                     case MessageTypes.Match:
                                         double timestamp = msg.Reader.ReadInt64();
-                                        MatchMessage matchMessage = UnCerealReader<MatchMessage>(msg.Reader);
+                                        MatchMessage matchMessage = UnCereal<MatchMessage>(ReadAllBytes(msg.Reader));
                                         if (matchMessage == null)
                                         {
                                             Log("Failed to deserialize received match message.");

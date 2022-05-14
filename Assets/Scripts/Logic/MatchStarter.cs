@@ -56,12 +56,8 @@ namespace Sanicball.Logic
                 using (var newMessage = new MessageWrapper(MessageTypes.Connect))
                 {
                     ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
-                    Debug.Log(info);
-                    var crael = Cereal(info);
-                    Debug.Log(System.Text.Encoding.Default.GetString(crael));
-                    newMessage.Writer.Write(crael);
+                    newMessage.Writer.Write(Cereal(info));
                     var buffer = newMessage.GetBytes();
-                    Debug.Log(buffer.Length);
                     joiningClient.Send(buffer);
                 }
 
@@ -95,7 +91,7 @@ namespace Sanicball.Logic
 
                                     try
                                     {
-                                        var matchInfo = UnCerealReader<MatchState>(message.Reader);
+                                        var matchInfo = UnCereal<MatchState>(ReadAllBytes(message.Reader));
                                         done = true;
                                         BeginOnlineGame(matchInfo);
                                     }
@@ -114,16 +110,18 @@ namespace Sanicball.Logic
                         }
                     }
 
-
-                    if (Input.GetKeyDown(KeyCode.Escape))
-                    {
-                        popupHandler.CloseActivePopup();
-                        joiningClient.Close();
-                        joiningClient = null;
-                    }
-
                     yield return null;
                 }
+            }
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                popupHandler.CloseActivePopup();
+                joiningClient.Close();
+                joiningClient = null;
             }
         }
 

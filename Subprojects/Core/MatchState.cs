@@ -5,6 +5,7 @@ using System.Text;
 
 namespace SanicballCore
 {
+    [System.Serializable]
     public class MatchState
     {
         public List<MatchClientState> Clients { get; private set; }
@@ -118,6 +119,7 @@ namespace SanicballCore
         }
     }
 
+    [System.Serializable]
     public class MatchClientState
     {
         public System.Guid Guid { get; private set; }
@@ -130,6 +132,7 @@ namespace SanicballCore
         }
     }
 
+    [System.Serializable]
     public class MatchPlayerState
     {
         public System.Guid ClientGuid { get; private set; }

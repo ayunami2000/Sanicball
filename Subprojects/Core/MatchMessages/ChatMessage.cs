@@ -6,6 +6,7 @@
         User
     }
 
+    [System.Serializable]
     public class ChatMessage : MatchMessage
     {
         public string From { get; private set; }

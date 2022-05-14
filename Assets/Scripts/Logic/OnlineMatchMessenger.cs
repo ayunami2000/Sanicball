@@ -50,11 +50,7 @@ namespace Sanicball.Logic
             var net = new MessageWrapper(MessageTypes.Match);
             net.Writer.Write(DateTime.Now.Ticks);
 
-            Stream cereal = CerealOne();
-            CerealTwo<T>(cereal, message);
-
-            var data = CerealThree(cereal);
-            net.Writer.Write(data);
+            net.Writer.Write(Cereal(message));
 
             client.Send(net.GetBytes());
             net.Dispose();
@@ -91,7 +87,7 @@ namespace Sanicball.Logic
                         case MessageTypes.Match:
                             var timestamp = message.Reader.ReadInt64();
 
-                            var matchMessage = UnCerealReader<MatchMessage>(message.Reader);
+                            var matchMessage = UnCereal<MatchMessage>(ReadAllBytes(message.Reader));
 
                             //Use reflection to call ReceiveMessage with the proper type parameter
                             var methodToCall = typeof(OnlineMatchMessenger).GetMethod("ReceiveMessage", BindingFlags.NonPublic | BindingFlags.Instance);

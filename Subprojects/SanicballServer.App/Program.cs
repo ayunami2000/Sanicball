@@ -31,7 +31,7 @@ namespace SanicballServer.App
             Task.Run(server.Start);
 
             HttpListener httpListener = new HttpListener();
-            httpListener.Prefixes.Add("http://localhost:25080/");
+            httpListener.Prefixes.Add("http://+:25080/");
             httpListener.Start();
             while (true)
             {
@@ -40,9 +40,7 @@ namespace SanicballServer.App
                 {
                     HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
                     WebSocket webSocket = webSocketContext.WebSocket;
-                    Console.WriteLine("123");
                     await server.ConnectClientAsync(webSocket);
-                    Console.WriteLine("456");
                 }
                 else
                 {

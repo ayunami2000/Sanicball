@@ -3560,10 +3560,11 @@ PrefabInstance:
     - target: {fileID: 11424744, guid: 348966db71fa603449cae3efa7eda193, type: 3}
       propertyPath: m_Text
       value: "Game/Coding/Models by <b>BK-TN</b>, with contributions from GitHub users
-        <b>DaGamer12345</b> and <b>snekery</b>.\n<b><u>Ported to WebGL by ayunami2000</u></b>\n\rSanicball
-        is built with Unity3D and coded in C#.\n\nMost art in this game has been shamelessly
-        stolen from sources all over the internet. If you are the author of anything
-        found here and would like me to remove your content, please contact me.\n"
+        <b>DaGamer12345</b> and <b>snekery</b>.\n<b>Ported to WebGL by ayunami2000
+        and multiplayer help by WamWooWam</b>\n\rSanicball is built with Unity3D and
+        coded in C#.\n\nMost art in this game has been shamelessly stolen from sources
+        all over the internet. If you are the author of anything found here and would
+        like me to remove your content, please contact me.\n"
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 3}
       propertyPath: m_AnchorMin.y
@@ -4154,7 +4155,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000061035156}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &398046130
@@ -6494,7 +6495,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000061035156}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &682994374
@@ -13094,7 +13095,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000061035156}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1316064883

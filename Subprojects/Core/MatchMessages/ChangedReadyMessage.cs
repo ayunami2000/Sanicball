@@ -1,5 +1,6 @@
 ﻿namespace SanicballCore.MatchMessages
 {
+    [System.Serializable]
     public class ChangedReadyMessage : MatchMessage
     {
         public System.Guid ClientGuid { get; private set; }
