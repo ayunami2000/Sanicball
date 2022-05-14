@@ -63,7 +63,7 @@ namespace Sanicball.Logic
 
                 var done = false;
                 byte[] msg;
-                while (!done && joiningClient != null)
+                while (!done)
                 {
                     msg = joiningClient.Recv();
                     if (msg != null)

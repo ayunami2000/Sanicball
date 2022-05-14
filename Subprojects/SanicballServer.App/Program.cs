@@ -31,11 +31,12 @@ namespace SanicballServer.App
             Task.Run(server.Start);
 
             HttpListener httpListener = new HttpListener();
-            httpListener.Prefixes.Add("http://+:25080/");
+            httpListener.Prefixes.Add("http://*:25080/");
             httpListener.Start();
             while (true)
             {
                 HttpListenerContext context = await httpListener.GetContextAsync();
+                context.Response.AppendHeader("Access-Control-Allow-Origin", "*");
                 if (context.Request.IsWebSocketRequest)
                 {
                     HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);

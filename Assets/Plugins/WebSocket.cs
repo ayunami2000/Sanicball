@@ -77,8 +77,12 @@ public class WebSocket
 	{
 		m_NativeRef = SocketCreate (mUrl.ToString());
 
-		while (SocketState(m_NativeRef) == 0)
-			yield return 0;
+        int timer = 0;
+		while (SocketState(m_NativeRef) == 0 && timer < 60*5)
+        {
+            timer++;
+            yield return null;
+        }
 	}
  
 	public void Close()
@@ -114,8 +118,16 @@ public class WebSocket
         m_Socket.Log.Level = WebSocketSharp.LogLevel.Debug;
         m_Socket.Log.Output = (sender, e) => Debug.Log(sender);
         m_Socket.ConnectAsync();
-        while (!m_IsConnected && m_Error == null)
-            yield return 0;
+        int timer = 0;
+        while (!m_IsConnected && timer < 60*5)
+        {
+            timer++;
+            yield return null;
+        }
+        if (timer >= 60*5)
+        {
+             m_Error = "Timed out.";
+        }
     }
 
     private void M_Socket_OnError(object sender, WebSocketSharp.ErrorEventArgs e)

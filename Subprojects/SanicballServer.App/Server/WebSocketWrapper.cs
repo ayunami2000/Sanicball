@@ -116,10 +116,13 @@ namespace SanicballServer
             {
                 try
                 {
-                    var wrapper = new MessageWrapper(MessageTypes.Disconnect);
-                    wrapper.Writer.Write(result.CloseStatusDescription ?? "Client disconnected");
-                    wrapper.Source = Id;
-                    _socketRecieveQueue.Enqueue(wrapper);
+                    if (result != null)
+                    {
+                        var wrapper = new MessageWrapper(MessageTypes.Disconnect);
+                        wrapper.Writer.Write(result.CloseStatusDescription ?? "Client disconnected");
+                        wrapper.Source = Id;
+                        _socketRecieveQueue.Enqueue(wrapper);
+                    }
 
                     _socket.Abort();
                 }

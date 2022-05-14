@@ -758,7 +758,7 @@ namespace SanicballCore.Server
                                         break;
 
                                     default:
-                                        //Log("Received data message of unknown type", LogLevel.Debug);
+                                        //Log("Received data message of unknown type");
                                         break;
                                 }
                             }
