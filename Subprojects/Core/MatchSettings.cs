@@ -69,7 +69,7 @@
                 AutoStartMinPlayers = 2,
                 AutoReturnTime = 15,
                 VoteRatio = 1f,
-                StageRotationMode = StageRotationMode.Random,
+                StageRotationMode = StageRotationMode.Sequenced,
 				AllowedTiers = AllowedTiers.NormalOnly,
                 TierRotationMode = TierRotationMode.None,
                 DisqualificationTime = 120

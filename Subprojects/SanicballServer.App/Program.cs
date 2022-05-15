@@ -3,13 +3,22 @@ using System.Net.WebSockets;
 using SanicballCore.Server;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SanicballServer.App
 {
     public class Program
     {
+        private static int port = 25080;
+        private static int playerCap = 16;
+        private static string serverName = "Sanicball Server";
+
         public static void Main(string[] args)
         {
+            Console.WriteLine("Command-line args: port playerCap serverName");
+            if (args.Length >= 1) port = int.Parse(args[0]);
+            if (args.Length >= 2) playerCap = int.Parse(args[1]);
+            if (args.Length >= 3) serverName = string.Join(" ", args, 2, args.Length - 2);
             CommandQueue commandQueue = new CommandQueue();
             StartServer(commandQueue);
             ReadInput(commandQueue);
@@ -25,13 +34,13 @@ namespace SanicballServer.App
 
         public static async Task StartServer(CommandQueue commandQueue)
         {
-            ServerConfig serverConfig = new ServerConfig() { ServerName = "ayunami2000's Ball Pit", MaxPlayers = 16 };
+            ServerConfig serverConfig = new ServerConfig() { ServerName = serverName, MaxPlayers = playerCap };
 
             Server server = new Server(commandQueue, serverConfig);
             Task.Run(server.Start);
 
             HttpListener httpListener = new HttpListener();
-            httpListener.Prefixes.Add("http://*:25080/");
+            httpListener.Prefixes.Add("http://*:" + port + "/");
             httpListener.Start();
             while (true)
             {
