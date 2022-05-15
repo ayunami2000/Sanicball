@@ -46,7 +46,7 @@ namespace SanicballServer.App
                 else
                 {
                     context.Response.AppendHeader("Content-Type", "text/html; charset=utf-8");
-                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(server.Config.ServerName + "<br>" + server.InGame.ToString() + "<br>" + server.ConnectedClients + "<br>" + server.Config.MaxPlayers + "<br>" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(server.Config.ServerName + "<br>" + server.InGame.ToString() + "<br>" + server.ConnectedClients + "<br>" + server.Config.MaxPlayers);
                     // Get a response stream and write the response to it.
                     context.Response.ContentLength64 = buffer.Length;
                     System.IO.Stream output = context.Response.OutputStream;

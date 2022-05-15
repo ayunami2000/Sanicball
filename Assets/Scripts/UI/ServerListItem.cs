@@ -25,7 +25,7 @@ namespace Sanicball.UI
             serverNameText.text = name;
             serverStatusText.text = inRace ? "In race" : "In lobby";
             playerCountText.text = players + "/" + maxPlayers;
-            pingText.text = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - pingTime).ToString() + "ms";
+            pingText.text = ((DateTime.UtcNow.Ticks - pingTime) / TimeSpan.TicksPerMillisecond).ToString() + "ms";
         }
 
         public void Join()

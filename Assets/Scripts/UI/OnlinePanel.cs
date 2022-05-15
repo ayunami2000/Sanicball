@@ -125,6 +125,7 @@ namespace Sanicball.UI
 
         private IEnumerator CheckServer(string url, string entry)
         {
+            long pingTime = DateTime.UtcNow.Ticks;
             using (WWW discoveryClient = new WWW(url))
             {
                 yield return discoveryClient;
@@ -135,7 +136,7 @@ namespace Sanicball.UI
 
                     var server = Instantiate(serverListItemPrefab);
                     server.transform.SetParent(targetServerListContainer, false);
-                    server.Init(entry, serverInfo[0], bool.Parse(serverInfo[1]), int.Parse(serverInfo[2]), int.Parse(serverInfo[3]), long.Parse(serverInfo[4]));
+                    server.Init(entry, serverInfo[0], bool.Parse(serverInfo[1]), int.Parse(serverInfo[2]), int.Parse(serverInfo[3]), pingTime);
                     servers.Add(server);
                     RefreshNavigation();
 

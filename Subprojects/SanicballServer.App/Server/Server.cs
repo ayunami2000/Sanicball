@@ -1211,7 +1211,7 @@ namespace SanicballCore.Server
             using (var memory = new MemoryStream())
             using (var writer = new BinaryWriter(memory, Encoding.UTF8, false))
             {
-                writer.Write(DateTime.Now.Ticks);
+                writer.Write(DateTime.UtcNow.Ticks);
                 writer.Write(matchMsgSerialized);
                 writer.Flush();
 
@@ -1231,7 +1231,7 @@ namespace SanicballCore.Server
             using (var memory = new MemoryStream())
             using (var writer = new BinaryWriter(memory, Encoding.UTF8, false))
             {
-                writer.Write(DateTime.Now.Ticks);
+                writer.Write(DateTime.UtcNow.Ticks);
                 writer.Write(matchMsgSerialized);
                 writer.Flush();
 

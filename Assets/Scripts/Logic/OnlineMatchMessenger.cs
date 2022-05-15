@@ -48,7 +48,7 @@ namespace Sanicball.Logic
         public override void SendMessage<T>(T message)
         {
             var net = new MessageWrapper(MessageTypes.Match);
-            net.Writer.Write(DateTime.Now.Ticks);
+            net.Writer.Write(DateTime.UtcNow.Ticks);
 
             net.Writer.Write(Cereal(message));
 
@@ -59,7 +59,7 @@ namespace Sanicball.Logic
         public void SendPlayerMovement(MatchPlayer player)
         {
             var msg = new MessageWrapper(MessageTypes.PlayerMovement);
-            msg.Writer.Write(DateTime.Now.Ticks);
+            msg.Writer.Write(DateTime.UtcNow.Ticks);
 
             var movement = Logic.PlayerMovement.CreateFromPlayer(player);
             movement.WriteToMessage(msg.Writer);
@@ -122,7 +122,7 @@ namespace Sanicball.Logic
 
         private void ReceiveMessage<T>(T message, long timestamp) where T : SanicballCore.MatchMessage
         {
-            var travelTime = (float)(DateTime.Now.Ticks - timestamp) / TimeSpan.TicksPerSecond;
+            var travelTime = (float)(DateTime.UtcNow.Ticks - timestamp) / TimeSpan.TicksPerSecond;
 
             for (var i = 0; i < listeners.Count; i++)
             {
