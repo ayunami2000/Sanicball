@@ -7,7 +7,7 @@ namespace Sanicball.Data
     {
         [Header("Online")]
         public string nickname = "";
-		public string serverListURL = "http://localhost/servers.txt";
+		public string serverListURL = "https://real.shhnowisnottheti.me/sblist/";
 
         [Header("Display")]
         public int resolution = 0;

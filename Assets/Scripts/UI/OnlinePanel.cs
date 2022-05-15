@@ -25,6 +25,8 @@ namespace Sanicball.UI
 
         private WWW serverBrowserRequester;
 
+        private bool pleaseStopSpamming = false;
+
         public void RefreshServers()
         {
             serverBrowserIPs.Clear();
@@ -40,6 +42,8 @@ namespace Sanicball.UI
                 Destroy(serv.gameObject);
             }
             servers.Clear();
+
+            pleaseStopSpamming = false;
         }
 
         private void Awake()
@@ -56,8 +60,9 @@ namespace Sanicball.UI
             }
 
             //Check for response from the server browser requester
-            if (serverBrowserRequester != null && serverBrowserRequester.isDone)
+            if (!pleaseStopSpamming && serverBrowserRequester != null && serverBrowserRequester.isDone)
             {
+                pleaseStopSpamming = true;
                 if (string.IsNullOrEmpty(serverBrowserRequester.error))
                 {
                     string result = serverBrowserRequester.text;
