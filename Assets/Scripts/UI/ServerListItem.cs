@@ -18,13 +18,14 @@ namespace Sanicball.UI
 
         public string Id { get; private set; }
 
-        public void Init(string id, string name, bool inRace, int players, int maxPlayers)
+        public void Init(string id, string name, bool inRace, int players, int maxPlayers, long pingTime)
         {
             Id = id;
 
             serverNameText.text = name;
             serverStatusText.text = inRace ? "In race" : "In lobby";
             playerCountText.text = players + "/" + maxPlayers;
+            pingText.text = (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - pingTime).ToString() + "ms";
         }
 
         public void Join()
@@ -32,7 +33,7 @@ namespace Sanicball.UI
             MatchStarter starter = FindObjectOfType<MatchStarter>();
             if (starter)
             {
-                starter.JoinOnlineGame(new Uri(Id, UriKind.Absolute));
+                StartCoroutine(starter.JoinOnlineGame(new Uri(Id, UriKind.Absolute)));
             }
             else
             {

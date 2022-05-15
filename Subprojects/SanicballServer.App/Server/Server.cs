@@ -771,6 +771,7 @@ namespace SanicballCore.Server
                     }
                 }
             }
+            Environment.Exit(0);
         }
 
         private async Task ClientJoinedAsync(MessageWrapper msg, MatchMessage matchMessage)

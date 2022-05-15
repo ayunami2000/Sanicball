@@ -5,6 +5,7 @@ using Sanicball.Data;
 using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace Sanicball.UI
 {
@@ -64,23 +65,7 @@ namespace Sanicball.UI
 
                     foreach (string entry in entries)
                     {
-                        WWW discoveryClient = new WWW("http" + entry.Remove(0,2));
-                        System.Threading.Thread discoverThread = new System.Threading.Thread(() => {
-                            while (discoveryClient != null && discoveryClient.isDone) {}
-                            if (string.IsNullOrEmpty(discoveryClient.error))
-                            {
-                                string serverResult = discoveryClient.text;
-                                string[] serverInfo = serverResult.Split(new string[] { "<br>" }, StringSplitOptions.RemoveEmptyEntries);
-
-                                var server = Instantiate(serverListItemPrefab);
-                                server.transform.SetParent(targetServerListContainer, false);
-                                server.Init(entry, serverInfo[0], bool.Parse(serverInfo[1]), int.Parse(serverInfo[2]), int.Parse(serverInfo[3]));
-                                servers.Add(server);
-                                RefreshNavigation();
-
-                                serverCountField.text = servers.Count + (servers.Count == 1 ? " server" : " servers");
-                            }
-                        });
+                        StartCoroutine(CheckServer("http" + entry.Remove(0,2), entry));
                         serverBrowserIPs.Add(entry);
                     }
 					serverCountField.text = "0 servers";
@@ -129,6 +114,27 @@ namespace Sanicball.UI
                     }
 
                     button.navigation = nav;
+                }
+            }
+        }
+
+        private IEnumerator CheckServer(string url, string entry)
+        {
+            using (WWW discoveryClient = new WWW(url))
+            {
+                yield return discoveryClient;
+                if (string.IsNullOrEmpty(discoveryClient.error))
+                {
+                    string serverResult = discoveryClient.text;
+                    string[] serverInfo = serverResult.Split(new string[] { "<br>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    var server = Instantiate(serverListItemPrefab);
+                    server.transform.SetParent(targetServerListContainer, false);
+                    server.Init(entry, serverInfo[0], bool.Parse(serverInfo[1]), int.Parse(serverInfo[2]), int.Parse(serverInfo[3]), long.Parse(serverInfo[4]));
+                    servers.Add(server);
+                    RefreshNavigation();
+
+                    serverCountField.text = servers.Count + (servers.Count == 1 ? " server" : " servers");
                 }
             }
         }

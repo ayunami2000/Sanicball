@@ -41,7 +41,9 @@ namespace SanicballCore
                 typeof(StartRaceMessage),
 
                 typeof(List<MatchClientState>),
-                typeof(List<MatchPlayerState>)
+                typeof(List<MatchPlayerState>),
+                typeof(MatchClientState),
+                typeof(MatchPlayerState)
             };
 
             public override Type BindToType(string assemblyName, string typeName)

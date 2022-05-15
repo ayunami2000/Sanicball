@@ -568,7 +568,17 @@ namespace Sanicball.Logic
                 Destroy(player.BallObject.gameObject);
             }
 
-            string name = clients.First(a => a.Guid == player.ClientGuid).Name + " (" + GameInput.GetControlTypeName(player.CtrlType) + ")";
+            string ctrlName = GameInput.GetControlTypeName(player.CtrlType);
+
+            string name = "";
+            try
+            {
+                name = clients.First(a => a.Guid == player.ClientGuid).Name + " (" + ctrlName + ")";
+            }
+            catch (InvalidOperationException e)
+            {
+                name = "Unknown Player (" + ctrlName + ")";
+            }
 
             player.BallObject = spawner.SpawnBall((player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, name);
 

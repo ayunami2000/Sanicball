@@ -24,14 +24,6 @@ namespace Sanicball.Logic
         //NetClient for when joining online matches
         private WebSocket joiningClient;
 
-        internal void JoinOnlineGame(Guid id)
-        {
-            var baseUri = new Uri(ActiveData.GameSettings.serverListURL);
-            var uri = new UriBuilder(new Uri(baseUri, id.ToString())) { Scheme = baseUri.Scheme == "https" ? "wss" : "ws" };
-
-            StartCoroutine(JoinOnlineGame(uri.Uri));
-        }
-
         public void BeginLocalGame()
         {
             var manager = Instantiate(matchManagerPrefab);
@@ -50,6 +42,7 @@ namespace Sanicball.Logic
             if (joiningClient.error != null)
             {
                 activeConnectingPopup.ShowMessage($"Failed to join! {joiningClient.error}");
+                joiningClient = null;
             }
             else
             {
@@ -60,63 +53,61 @@ namespace Sanicball.Logic
                     var buffer = newMessage.GetBytes();
                     joiningClient.Send(buffer);
                 }
-
-                var done = false;
-                byte[] msg;
-                while (!done)
-                {
-                    msg = joiningClient.Recv();
-                    if (msg != null)
-                    {
-                        using (var message = new MessageWrapper(msg))
-                        {
-                            switch (message.Type)
-                            {                                
-                                case MessageTypes.Validate: // should only be recieved if validation fails
-
-                                    var valid = message.Reader.ReadBoolean();
-                                    if (!valid)
-                                    {
-                                        var str = message.Reader.ReadString();
-                                        activeConnectingPopup.ShowMessage($"Failed to join! {str}");
-                                        joiningClient.Close();
-                                        joiningClient = null;
-                                    }
-
-                                    break;
-
-                                case MessageTypes.Connect:
-                                    Debug.Log("Connected! Now waiting for match state");
-                                    activeConnectingPopup.ShowMessage("Receiving match state...");
-
-                                    try
-                                    {
-                                        var matchInfo = UnCereal<MatchState>(ReadAllBytes(message.Reader));
-                                        done = true;
-                                        BeginOnlineGame(matchInfo);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        activeConnectingPopup.ShowMessage("Failed to read match message - cannot join server!");
-                                        Debug.LogError("Could not read match state, error: " + ex.Message);
-                                    }
-
-                                    break;
-
-                                case MessageTypes.Disconnect:
-                                    activeConnectingPopup.ShowMessage(message.Reader.ReadString());
-                                    break;
-                            }
-                        }
-                    }
-
-                    yield return null;
-                }
             }
         }
 
+        private bool done = false;
+
         private void Update()
         {
+            if (joiningClient != null)
+            {
+                byte[] msg;
+                while ((msg = joiningClient.Recv()) != null)
+                {
+                    using (var message = new MessageWrapper(msg))
+                    {
+                        switch (message.Type)
+                        {                                
+                            case MessageTypes.Validate: // should only be recieved if validation fails
+
+                                var valid = message.Reader.ReadBoolean();
+                                if (!valid)
+                                {
+                                    var str = message.Reader.ReadString();
+                                    activeConnectingPopup.ShowMessage($"Failed to join! {str}");
+                                    joiningClient.Close();
+                                    joiningClient = null;
+                                }
+
+                                break;
+
+                            case MessageTypes.Connect:
+                                Debug.Log("Connected! Now waiting for match state");
+                                activeConnectingPopup.ShowMessage("Receiving match state...");
+
+                                try
+                                {
+                                    var matchInfo = UnCereal<MatchState>(ReadAllBytes(message.Reader));
+                                    done = true;
+                                    BeginOnlineGame(matchInfo);
+                                }
+                                catch (Exception ex)
+                                {
+                                    activeConnectingPopup.ShowMessage("Failed to read match message - cannot join server!");
+                                    Debug.LogError("Could not read match state, error: " + ex.Message);
+                                }
+
+                                break;
+
+                            case MessageTypes.Disconnect:
+                                activeConnectingPopup.ShowMessage(message.Reader.ReadString());
+                                break;
+                        }
+                    }
+                }
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 popupHandler.CloseActivePopup();
