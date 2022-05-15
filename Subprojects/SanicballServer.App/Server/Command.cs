@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SanicballCore.Server
+﻿namespace SanicballCore.Server
 {
     public delegate void CommandHandler(Command cmd);
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-
-namespace SanicballCore.Server
+﻿namespace SanicballCore.Server
 {
     //Used as response when a client sends a server a discovery request.
     public struct ServerConfig

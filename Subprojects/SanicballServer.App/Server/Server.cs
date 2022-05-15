@@ -43,7 +43,6 @@ namespace SanicballCore.Server
         public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
         private const string MOTD_FILENAME = "MOTD.txt";
-        private const string DEFAULT_SERVER_LIST_URL = "https://ayunami2000.pythonanywhere.com/servers";
         private const int TICKRATE = 20;
         private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't receive the actual count since it's part of a Unity prefab.
         private readonly CharacterTier[] characterTiers = new[] { //Hardcoded character tiers, same reason
@@ -425,7 +424,7 @@ namespace SanicballCore.Server
 
         public async Task Start()
         {
-            matchSettings = MatchSettings.CreateDefault();
+            LoadMatchSettings();
 
             LoadMOTD();
 
@@ -1347,9 +1346,18 @@ namespace SanicballCore.Server
 
         private void SaveMatchSettings()
         {
-            using (var sw = new StreamWriter(SETTINGS_FILENAME))
+            File.WriteAllBytes(SETTINGS_FILENAME, Cereal(matchSettings));
+        }
+
+        private void LoadMatchSettings()
+        {
+            if (File.Exists(SETTINGS_FILENAME))
             {
-                sw.Write(Cereal(matchSettings));
+                matchSettings = UnCereal<MatchSettings>(File.ReadAllBytes(SETTINGS_FILENAME));
+            }
+            else
+            {
+                matchSettings = MatchSettings.CreateDefault();
             }
         }
 

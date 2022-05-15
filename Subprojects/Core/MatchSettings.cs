@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-
-namespace SanicballCore
+﻿namespace SanicballCore
 {
     public enum AISkillLevel
     {
@@ -75,7 +70,7 @@ namespace SanicballCore
                 AutoReturnTime = 15,
                 VoteRatio = 1f,
                 StageRotationMode = StageRotationMode.Random,
-				AllowedTiers = AllowedTiers.All,
+				AllowedTiers = AllowedTiers.NormalOnly,
                 TierRotationMode = TierRotationMode.None,
                 DisqualificationTime = 120
             };
